@@ -91,8 +91,8 @@ EOT
     resource_group_name              = string
     vm_size                          = string
     availability_set_id              = optional(string)
-    delete_data_disks_on_termination = optional(bool, false)
-    delete_os_disk_on_termination    = optional(bool, false)
+    delete_data_disks_on_termination = optional(bool) # Default: false
+    delete_os_disk_on_termination    = optional(bool) # Default: false
     license_type                     = optional(string)
     primary_network_interface_id     = optional(string)
     proximity_placement_group_id     = optional(string)
@@ -108,7 +108,7 @@ EOT
       name                      = string
       os_type                   = optional(string)
       vhd_uri                   = optional(string)
-      write_accelerator_enabled = optional(bool, false)
+      write_accelerator_enabled = optional(bool) # Default: false
     })
     additional_capabilities = optional(object({
       ultra_ssd_enabled = bool
@@ -148,8 +148,8 @@ EOT
         pass         = string
         setting_name = string
       }))
-      enable_automatic_upgrades = optional(bool, false)
-      provision_vm_agent        = optional(bool, false)
+      enable_automatic_upgrades = optional(bool) # Default: false
+      provision_vm_agent        = optional(bool) # Default: false
       timezone                  = optional(string)
       winrm = optional(object({
         certificate_url = optional(string)
@@ -170,7 +170,7 @@ EOT
       managed_disk_type         = optional(string)
       name                      = string
       vhd_uri                   = optional(string)
-      write_accelerator_enabled = optional(bool, false)
+      write_accelerator_enabled = optional(bool) # Default: false
     }))
     storage_image_reference = optional(object({
       id        = optional(string)
