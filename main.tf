@@ -66,7 +66,7 @@ resource "azurerm_virtual_machine" "virtual_machines" {
     content {
       disable_password_authentication = os_profile_linux_config.value.disable_password_authentication
       dynamic "ssh_keys" {
-        for_each = os_profile_linux_config.value.ssh_keys != null ? [os_profile_linux_config.value.ssh_keys] : []
+        for_each = os_profile_linux_config.value.ssh_keys != null ? os_profile_linux_config.value.ssh_keys : []
         content {
           key_data = ssh_keys.value.key_data
           path     = ssh_keys.value.path
@@ -76,11 +76,11 @@ resource "azurerm_virtual_machine" "virtual_machines" {
   }
 
   dynamic "os_profile_secrets" {
-    for_each = each.value.os_profile_secrets != null ? [each.value.os_profile_secrets] : []
+    for_each = each.value.os_profile_secrets != null ? each.value.os_profile_secrets : []
     content {
       source_vault_id = os_profile_secrets.value.source_vault_id
       dynamic "vault_certificates" {
-        for_each = os_profile_secrets.value.vault_certificates != null ? [os_profile_secrets.value.vault_certificates] : []
+        for_each = os_profile_secrets.value.vault_certificates != null ? os_profile_secrets.value.vault_certificates : []
         content {
           certificate_store = vault_certificates.value.certificate_store
           certificate_url   = vault_certificates.value.certificate_url
@@ -93,7 +93,7 @@ resource "azurerm_virtual_machine" "virtual_machines" {
     for_each = each.value.os_profile_windows_config != null ? [each.value.os_profile_windows_config] : []
     content {
       dynamic "additional_unattend_config" {
-        for_each = os_profile_windows_config.value.additional_unattend_config != null ? [os_profile_windows_config.value.additional_unattend_config] : []
+        for_each = os_profile_windows_config.value.additional_unattend_config != null ? os_profile_windows_config.value.additional_unattend_config : []
         content {
           component    = additional_unattend_config.value.component
           content      = additional_unattend_config.value.content
@@ -105,7 +105,7 @@ resource "azurerm_virtual_machine" "virtual_machines" {
       provision_vm_agent        = os_profile_windows_config.value.provision_vm_agent
       timezone                  = os_profile_windows_config.value.timezone
       dynamic "winrm" {
-        for_each = os_profile_windows_config.value.winrm != null ? [os_profile_windows_config.value.winrm] : []
+        for_each = os_profile_windows_config.value.winrm != null ? os_profile_windows_config.value.winrm : []
         content {
           certificate_url = winrm.value.certificate_url
           protocol        = winrm.value.protocol
@@ -124,7 +124,7 @@ resource "azurerm_virtual_machine" "virtual_machines" {
   }
 
   dynamic "storage_data_disk" {
-    for_each = each.value.storage_data_disk != null ? [each.value.storage_data_disk] : []
+    for_each = each.value.storage_data_disk != null ? each.value.storage_data_disk : []
     content {
       caching                   = storage_data_disk.value.caching
       create_option             = storage_data_disk.value.create_option

@@ -129,39 +129,39 @@ EOT
     }))
     os_profile_linux_config = optional(object({
       disable_password_authentication = bool
-      ssh_keys = optional(object({
+      ssh_keys = optional(list(object({
         key_data = string
         path     = string
-      }))
+      })))
     }))
-    os_profile_secrets = optional(object({
+    os_profile_secrets = optional(list(object({
       source_vault_id = string
-      vault_certificates = optional(object({
+      vault_certificates = optional(list(object({
         certificate_store = optional(string)
         certificate_url   = string
-      }))
-    }))
+      })))
+    })))
     os_profile_windows_config = optional(object({
-      additional_unattend_config = optional(object({
+      additional_unattend_config = optional(list(object({
         component    = string
         content      = string
         pass         = string
         setting_name = string
-      }))
+      })))
       enable_automatic_upgrades = optional(bool) # Default: false
       provision_vm_agent        = optional(bool) # Default: false
       timezone                  = optional(string)
-      winrm = optional(object({
+      winrm = optional(list(object({
         certificate_url = optional(string)
         protocol        = string
-      }))
+      })))
     }))
     plan = optional(object({
       name      = string
       product   = string
       publisher = string
     }))
-    storage_data_disk = optional(object({
+    storage_data_disk = optional(list(object({
       caching                   = optional(string)
       create_option             = string
       disk_size_gb              = optional(number)
@@ -171,7 +171,7 @@ EOT
       name                      = string
       vhd_uri                   = optional(string)
       write_accelerator_enabled = optional(bool) # Default: false
-    }))
+    })))
     storage_image_reference = optional(object({
       id        = optional(string)
       offer     = optional(string)
@@ -184,54 +184,6 @@ EOT
     condition = alltrue([
       for k, v in var.virtual_machines : (
         v.zones == null || (length(v.zones) > 0)
-      )
-    ])
-    error_message = "must not be empty"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.virtual_machines : (
-        v.license_type == null || (contains(["Windows_Client", "Windows_Server"], v.license_type))
-      )
-    ])
-    error_message = "must be one of: Windows_Client, Windows_Server"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.virtual_machines : (
-        v.os_profile_windows_config == null || (v.os_profile_windows_config.winrm == null || (contains(["HTTP", "HTTPS"], v.os_profile_windows_config.winrm.protocol)))
-      )
-    ])
-    error_message = "must be one of: HTTP, HTTPS"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.virtual_machines : (
-        v.os_profile_windows_config == null || (v.os_profile_windows_config.additional_unattend_config == null || (contains(["oobeSystem"], v.os_profile_windows_config.additional_unattend_config.pass)))
-      )
-    ])
-    error_message = "must be one of: oobeSystem"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.virtual_machines : (
-        v.os_profile_windows_config == null || (v.os_profile_windows_config.additional_unattend_config == null || (contains(["Microsoft-Windows-Shell-Setup"], v.os_profile_windows_config.additional_unattend_config.component)))
-      )
-    ])
-    error_message = "must be one of: Microsoft-Windows-Shell-Setup"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.virtual_machines : (
-        v.os_profile_windows_config == null || (v.os_profile_windows_config.additional_unattend_config == null || (contains(["AutoLogon", "FirstLogonCommands"], v.os_profile_windows_config.additional_unattend_config.setting_name)))
-      )
-    ])
-    error_message = "must be one of: AutoLogon, FirstLogonCommands"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.virtual_machines : (
-        length(v.network_interface_ids) > 0
       )
     ])
     error_message = "must not be empty"
@@ -262,6 +214,9 @@ EOT
   #   source:    [from commonids.ValidateUserAssignedIdentityID] !ok
   # path: identity.identity_ids[*]
   #   source:    [from commonids.ValidateUserAssignedIdentityID] err != nil
+  # path: license_type
+  #   condition: contains(["Windows_Client", "Windows_Server"], value)
+  #   message:   must be one of: Windows_Client, Windows_Server
   # path: storage_os_disk.os_type
   #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
   # path: storage_os_disk.managed_disk_type
@@ -274,6 +229,21 @@ EOT
   #   source:    [from validate.DiskSizeGB] value < 0 || value > 32767
   # path: os_profile_windows_config.timezone
   #   source:    validate.VirtualMachineTimeZoneCaseInsensitive: no recognizable `if ... { errors = append(...) }` pattern - read it by hand
+  # path: os_profile_windows_config.winrm.protocol
+  #   condition: contains(["HTTP", "HTTPS"], value)
+  #   message:   must be one of: HTTP, HTTPS
+  # path: os_profile_windows_config.additional_unattend_config.pass
+  #   condition: contains(["oobeSystem"], value)
+  #   message:   must be one of: oobeSystem
+  # path: os_profile_windows_config.additional_unattend_config.component
+  #   condition: contains(["Microsoft-Windows-Shell-Setup"], value)
+  #   message:   must be one of: Microsoft-Windows-Shell-Setup
+  # path: os_profile_windows_config.additional_unattend_config.setting_name
+  #   condition: contains(["AutoLogon", "FirstLogonCommands"], value)
+  #   message:   must be one of: AutoLogon, FirstLogonCommands
+  # path: network_interface_ids[*]
+  #   condition: length(value) > 0
+  #   message:   must not be empty
   # path: tags
   #   condition: length(value) <= 50
   #   message:   [from tags.Validate: invalid when len(value) > 50]
