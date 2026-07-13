@@ -91,8 +91,8 @@ EOT
     resource_group_name              = string
     vm_size                          = string
     availability_set_id              = optional(string)
-    delete_data_disks_on_termination = optional(bool) # Default: false
-    delete_os_disk_on_termination    = optional(bool) # Default: false
+    delete_data_disks_on_termination = optional(bool)
+    delete_os_disk_on_termination    = optional(bool)
     license_type                     = optional(string)
     primary_network_interface_id     = optional(string)
     proximity_placement_group_id     = optional(string)
@@ -108,7 +108,7 @@ EOT
       name                      = string
       os_type                   = optional(string)
       vhd_uri                   = optional(string)
-      write_accelerator_enabled = optional(bool) # Default: false
+      write_accelerator_enabled = optional(bool)
     })
     additional_capabilities = optional(object({
       ultra_ssd_enabled = bool
@@ -148,8 +148,8 @@ EOT
         pass         = string
         setting_name = string
       })))
-      enable_automatic_upgrades = optional(bool) # Default: false
-      provision_vm_agent        = optional(bool) # Default: false
+      enable_automatic_upgrades = optional(bool)
+      provision_vm_agent        = optional(bool)
       timezone                  = optional(string)
       winrm = optional(list(object({
         certificate_url = optional(string)
@@ -170,7 +170,7 @@ EOT
       managed_disk_type         = optional(string)
       name                      = string
       vhd_uri                   = optional(string)
-      write_accelerator_enabled = optional(bool) # Default: false
+      write_accelerator_enabled = optional(bool)
     })))
     storage_image_reference = optional(object({
       id        = optional(string)
@@ -180,14 +180,6 @@ EOT
       version   = optional(string)
     }))
   }))
-  validation {
-    condition = alltrue([
-      for k, v in var.virtual_machines : (
-        v.zones == null || (length(v.zones) > 0)
-      )
-    ])
-    error_message = "must not be empty"
-  }
   # --- Unconfirmed validation candidates, derived from azurerm_virtual_machine's provider source ---
   # Not auto-enabled: either a bespoke provider validator we can't safely translate,
   # or a path that crosses a list-typed block (needs its own for_each wrapping).
@@ -208,6 +200,9 @@ EOT
   #   source:    [from resourcegroups.ValidateName: invalid when len(value) == 0]
   # path: resource_group_name
   #   source:    [from resourcegroups.ValidateName] !matched
+  # path: zones[*]
+  #   condition: length(value) > 0
+  #   message:   must not be empty
   # path: identity.type
   #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
   # path: identity.identity_ids[*]
